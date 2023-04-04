@@ -29,7 +29,7 @@ main_page = get_html_from_url(main_page_url)
 types_pages = get_all_types_pages(main_page)
 
 pokemons = []
-for type_page in types_pages[]:
+for type_page in types_pages:
     page = get_html_from_url(type_page)
     pokemons.extend(get_all_pokemon_from_page(page))
 
