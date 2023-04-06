@@ -1,8 +1,7 @@
 from fastapi import FastAPI, Request, Body, Response, APIRouter, HTTPException
-from fastapi.encoders import jsonable_encoder
-from pymongo import MongoClient
+from pymongo import MongoClient, TEXT
 from models import Pokemon
-import json
+from utils import possible_Queries
 
 app = FastAPI()
 client = MongoClient("mongodb://127.0.0.1/")
@@ -21,7 +20,7 @@ def set_uniqueAttribute():
 set_uniqueAttribute()
 
 
-@app.post("/createPokemon")
+@ app.post("/createPokemon")
 def createPokemon(request: Request, pokemon: Pokemon = Body(...)):
     if collection.find_one({"national_number": pokemon.national_number, "paldea_number": pokemon.paldea_number,  "name":  pokemon.name}):
         raise HTTPException(status_code=400, detail="Pokemon already exists")
@@ -30,15 +29,21 @@ def createPokemon(request: Request, pokemon: Pokemon = Body(...)):
     return "Pokemon created successfully"
 
 
-@app.get("/getPokemons", response_model=list[Pokemon])
+@ app.get("/getPokemons", response_model=list[Pokemon])
 def get(request: Request):
-    pokemons = list(collection.find())
-    print(pokemons)
+    searchParams = possible_Queries(request.query_params)
+    if (searchParams):
+        pokemons = list(collection.find(searchParams))
+        if (len(pokemons) == 0):
+            raise HTTPException(status_code=404, detail="Pokemon not found")
+    else:
+        pokemons = list(collection.find())
     return pokemons
 
 
-@app.delete("/deletePokemon/{national_number}")
+@ app.delete("/deletePokemon/{national_number}")
 def deletePokemon(request: Request, national_number: int):
+
     deleted = collection.delete_one(
         {"national_number": national_number}).deleted_count
     if (deleted == 0):
