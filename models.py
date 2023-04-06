@@ -99,3 +99,16 @@ class Pokemon(BaseModel):
 
                         }
         }
+
+
+class SearchPokemon(BaseModel):
+    national_number: int = Field(None)  # id of pokemon
+    paldea_number: int = Field(None)  # id of pokemon in paldea
+    male: int = Field(None)  # {gender : probability}
+    female: int = Field(None)
+    unknown: int = Field(None)
+    name: str = Field(None)  # {language: name}
+    classification: str = Field(None)
+    habilities: list = Field(None)
+    type: str = Field(None)
+    weakness: list = Field(None)

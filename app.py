@@ -1,7 +1,7 @@
 from fastapi import FastAPI, Request, Body, Response, APIRouter, HTTPException
 from pymongo import MongoClient, TEXT
-from models import Pokemon
-from utils import possible_Queries
+from models import Pokemon, SearchPokemon
+from utils import possible_searches
 
 app = FastAPI()
 client = MongoClient("mongodb://127.0.0.1/")
@@ -29,13 +29,17 @@ def createPokemon(request: Request, pokemon: Pokemon = Body(...)):
     return "Pokemon created successfully"
 
 
-@ app.get("/getPokemons", response_model=list[Pokemon])
-def get(request: Request):
-    searchParams = possible_Queries(request.query_params)
-    if (searchParams):
-        pokemons = list(collection.find(searchParams))
-        if (len(pokemons) == 0):
-            raise HTTPException(status_code=404, detail="Pokemon not found")
+@ app.post("/getPokemons", response_model=list[Pokemon])
+def get(request: Request, pokemon: SearchPokemon = Body(None)):
+    if (pokemon):
+        searchParams = possible_searches(pokemon)
+        if (searchParams):
+            pokemons = list(collection.find(searchParams))
+            if (len(pokemons) == 0):
+                raise HTTPException(
+                    status_code=404, detail="Pokemon not found")
+        else:
+            raise HTTPException(status_code=400, detail="Invalid search")
     else:
         pokemons = list(collection.find())
     return pokemons
