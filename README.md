@@ -1,5 +1,8 @@
 # PokemonAPI
+
 Pokemon Gen IX API
+
+pip install bs4
 
 ## FastAPI Installation
 

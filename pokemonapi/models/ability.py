@@ -8,10 +8,11 @@ def create_ability(name, description, in_deth_description):
         "in_deth_description": in_deth_description,
     }
 
+
 class Ability(BaseModel):
-    name: str = Field(...)  # name of an ability 
-    description: str = Field(...) # description of an ability
-    in_deth_description: str = Field(...) # in_deth_description of an ability
+    name: str = Field(...)  # name of an ability
+    description: str = Field(...)  # description of an ability
+    in_deth_description: str = Field(...)  # in_deth_description of an ability
 
     class Config:
         schema_extra = {
