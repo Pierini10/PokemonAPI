@@ -1,9 +1,23 @@
 from pydantic import BaseModel, Field
 
+
+def create_attack(name, type, category, pp, damage, accuracy, effect):
+    return {
+        "name": name,
+        "type": type,
+        "category": category,
+        "pp": pp,
+        "damage": damage,
+        "accuracy": accuracy,
+        "effect": effect,
+    }
+
 class AttactCategory:
     PHYSICAL = "PHYSICAL"
     SPECIAL = "SPECIAL"
     OTHER = "OTHER"
+
+    ALL = [PHYSICAL, SPECIAL, OTHER]
 
 class Attack(BaseModel):
     name: str = Field(...)  # name of an attack
