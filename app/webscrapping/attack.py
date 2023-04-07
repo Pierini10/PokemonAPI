@@ -3,9 +3,6 @@ from .utils import get_html_from_url, base_url, process_img_url, process_int
 from ..models.attack import AttactCategory, create_attack
 
 
-
-
-
 def get_all_attack_types_pages(main_page):
     soup = BeautifulSoup(main_page, 'html.parser')
     types_pages = []
