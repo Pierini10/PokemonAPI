@@ -1,4 +1,4 @@
-from models import SearchPokemon
+from Models.pokemon import SearchPokemon
 
 
 def possible_searches(query: SearchPokemon):

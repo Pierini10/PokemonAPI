@@ -1,6 +1,6 @@
 from fastapi import FastAPI, Request, Body, Response, APIRouter, HTTPException
 from pymongo import MongoClient, TEXT
-from models import Pokemon, SearchPokemon
+from Models.pokemon import Pokemon, SearchPokemon
 from utils import possible_searches
 
 app = FastAPI()
