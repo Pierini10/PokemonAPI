@@ -1,6 +1,5 @@
 from Models.pokemon import SearchPokemon
 
-
 def possible_searches(query: SearchPokemon):
     searchParams = {"$and": []}
     if (name := query.name):
