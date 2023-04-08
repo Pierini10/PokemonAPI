@@ -1,7 +1,8 @@
-from Models.pokemon import SearchPokemon
+from .models.pokemon import SearchPokemon
+from .models.attack import SearchAttack
 
 
-def possible_searches(query: SearchPokemon):
+def possible_pokemon_searchs(query: SearchPokemon):
     searchParams = {"$and": []}
     if (name := query.name):
         name = name[0].upper() + name[1:].lower()
@@ -42,6 +43,47 @@ def possible_searches(query: SearchPokemon):
     if (classification := query.classification):
         classification = prepareString(classification)
         searchParams["classification"] = classification
+
+    print(searchParams)
+    if (searchParams["$and"] == []):
+        del searchParams["$and"]
+    return searchParams
+
+
+def possible_attack_searchs(query: SearchAttack):
+    searchParams = {"$and": []}
+    if (name := query.name):
+        name = prepareString(name)
+        searchParams["name"] = name
+    if (type := query.type):
+        type = type.upper()
+        searchParams["type"] = type
+    if (category := query.category):
+        category = category.upper()
+        searchParams["category"] = category
+
+    if (query.pp):
+        searchParams["pp"] = int(query.pp)
+    if (query.mtPp):
+        searchParams["$and"].append({"pp": {"$gte": int(query.mtPp)}})
+    if (query.ltPp):
+        searchParams["$and"].append({"pp": {"$lte": int(query.ltPp)}})
+
+    if (query.damage):
+        searchParams["damage"] = int(query.damage)
+    if (query.mtDamage):
+        searchParams["$and"].append({"damage": {"$gte": int(query.mtDamage)}})
+    if (query.ltDamage):
+        searchParams["$and"].append({"damage": {"$lte": int(query.ltDamage)}})
+
+    if (query.accuracy):
+        searchParams["accuracy"] = int(query.accuracy)
+    if (query.mtAccuracy):
+        searchParams["$and"].append(
+            {"accuracy": {"$gte": int(query.mtAccuracy)}})
+    if (query.ltAccuracy):
+        searchParams["$and"].append(
+            {"accuracy": {"$lte": int(query.ltAccuracy)}})
 
     print(searchParams)
     if (searchParams["$and"] == []):

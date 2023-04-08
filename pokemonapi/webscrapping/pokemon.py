@@ -1,13 +1,6 @@
-import urllib.request
 from bs4 import BeautifulSoup
+from .utils import get_html_from_url, base_url
 
-base_url = "https://www.serebii.net"
-
-def get_html_from_url(url):
-    page = urllib.request.urlopen(url)
-    html = page.read().decode("ISO-8859-1")
-    page.close()
-    return html
 
 def get_all_types_pages(main_page):
     soup = BeautifulSoup(main_page, 'html.parser')
