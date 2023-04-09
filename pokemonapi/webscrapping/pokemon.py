@@ -645,7 +645,7 @@ def get_pokemon_data(pokemon):
 
 
 
-def loadPokemons():
+def load_all_pokemons():
     main_page_url = f"{base_url}/pokedex-sv"
     main_page = get_html_from_url(main_page_url)
 

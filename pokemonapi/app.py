@@ -7,6 +7,7 @@ from .models.attack import Attack, SearchAttack, EditableAttack
 from .utils import possible_pokemon_searchs, possible_attack_searchs, prepareString
 from .webscrapping.ability import load_all_ability
 from .webscrapping.attack import load_all_attacks
+from .webscrapping.pokemon import load_all_pokemons
 
 app = FastAPI()
 client = MongoClient("mongodb://127.0.0.1/")
@@ -160,7 +161,7 @@ def deleteAbility(request: Request, name: str):
 
 @ app.get("/loadPokemons")
 def loadPokemons():
-    pokemons = loadPokemons()
+    pokemons = load_all_pokemons()
     for pokemon in pokemons:
         if not pokemon_collection.find_one({"national_number": pokemon['national_number']}):
             pokemon_collection.insert_one(pokemon)
