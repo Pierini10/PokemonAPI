@@ -420,8 +420,12 @@ def join_data(pictures, info, more_info, even_more_info, weakness, gender_differ
     pokemon['national_number'] = int(info['No.']['National'].split('#')[1])
     pokemon['other_names'] = info['Other Names']
     pokemon['stats'] = stats
-    pokemon['type'] = info['Type']
     pokemon['weakness'] = weakness
+    if isinstance(info['Type'], list):
+        pokemon['type'] = { 'Normal': info['Type']}
+    else:
+        pokemon['type'] = info['Type']
+        
     
     gender = {}
     if isinstance(info['Gender Ratio'], str):

@@ -31,7 +31,7 @@ class PokemonType:
 class PokemonEgg(BaseModel):
     egg_steps: int = Field(...)
     egg_cycles: int = Field(...)
-    egg_group: tuple = Field(...)  # (str, str)
+    egg_group: list = Field(...)  # (str, str)
 
 
 class PokemonExperience(BaseModel):
@@ -60,22 +60,26 @@ class Pokemon(BaseModel):
     national_number: int = Field(...)  # id of pokemon
     paldea_number: int = Field(...)  # id of pokemon in paldea
     gender: dict = Field(...)  # {gender : probability}
-    name: dict = Field(...)  # {language: name}
+    name: str = Field(...)  # {language: name}
+    other_names: dict = Field(...)  # {language: name}
     image_link: dict = Field(...)  # {image_name: link}
-    type: tuple = Field(...)
+    type: dict = Field(...)
+    stats: dict = Field(...)
     classification: str = Field(...)
     height: dict = Field(...)  # {unit: height}
     weight: dict = Field(...)  # {unit: weight}
     capture_rate: int = Field(...)
     egg: PokemonEgg = Field(...)
-    # (PokemonAbility, PokemonAbility, PokemonAbility)
-    habilities: tuple = Field(...)
-    experience: PokemonExperience = Field(...)
+    abilities: dict = Field(...)
+    alternate_forms: list = Field(...)
+    gender_differences: list = Field(...)
+    # experience: PokemonExperience = Field(...)
     base_happiness: int = Field(...)
-    effort_values: PokemonEffortValue = Field(...)
+    effort_values: dict = Field(...)
     weakness: dict = Field(...)
     # (PokemonWildHoldItem, PokemonWildHoldItem, PokemonWildHoldItem)
-    wild_hold_item: tuple = Field(...)
+    wild_hold_item: dict = Field(...)
+    moves: dict = Field(...)
 
     class Config:
         schema_extra = {
@@ -90,7 +94,7 @@ class Pokemon(BaseModel):
                         "weight": {"unit": "6.0 kg"},
                         "capture_rate": 190,
                         "egg": {"egg_steps": 5120, "egg_cycles": 20, "egg_group": ("Field", "Fairy")},
-                        "habilities": ("Static", "Lightning Rod", "Static"),
+                        "aabilities": {"normal" : ["Static", "Lightning Rod", "Static"]},
                         "experience": {"base_experience": 112, "experience_growth": "Medium Fast"},
                         "base_happiness": 70,
                         "effort_values": {"value": 1, "type": "Speed"},
