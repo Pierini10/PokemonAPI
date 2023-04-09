@@ -414,7 +414,11 @@ def join_data(pictures, info, more_info, even_more_info, weakness, gender_differ
     pokemon['classification'] = info['Classification']
     pokemon['gender_differences'] = gender_differences
     pokemon['image_link'] = pictures
-    pokemon['paldea_number'] = int(info['No.']['Paldea'].split('#')[1])
+    try:
+        pokemon['paldea_number'] = int(info['No.']['Paldea'].split('#')[1])
+    except ValueError:
+        pokemon['paldea_number'] = 0
+        
     pokemon['moves'] = moves
     pokemon['name'] = info['Name']
     pokemon['national_number'] = int(info['No.']['National'].split('#')[1])
