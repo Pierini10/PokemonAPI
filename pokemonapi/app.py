@@ -160,7 +160,13 @@ def deleteAbility(request: Request, name: str):
 
 @ app.get("/loadPokemons")
 def loadPokemons():
-    # TODO: COMPLETE THIS
+    pokemons = loadPokemons()
+    for pokemon in pokemons:
+        if not pokemon_collection.find_one({"national_number": pokemon['national_number']}):
+            pokemon_collection.insert_one(pokemon)
+        else:
+            pokemon_collection.update_one(
+                {"national_number": pokemon['national_number']}, {"$set": pokemon})
     return {"message": "Pokemons loaded successfully"}
 
 

@@ -1,4 +1,5 @@
 from bs4 import BeautifulSoup
+import re
 from .utils import get_html_from_url, base_url
 
 
@@ -52,7 +53,7 @@ def get_poke_info(data:BeautifulSoup):
                         key = pairs[0].text.split(' ')[0]
                         
                     if imgs := pairs[1].find_all("img"):
-                        val = tuple([img.get('alt').split('-')[0].upper() for img in imgs])
+                        val = [img.get('alt').split('-')[0].upper() for img in imgs]
                     else:
                         if pairs[1].find('br'):
                             val = pairs[1].get_text(separator=', ')
@@ -64,7 +65,7 @@ def get_poke_info(data:BeautifulSoup):
                 info[attrib.text] = dic
                 
             elif imgs := value.find_all("img"):
-                info[attrib.text] = tuple([img.get('alt').split('-')[0].upper() for img in imgs])
+                info[attrib.text] = [img.get('alt').split('-')[0].upper() for img in imgs]
                 
             else:
                 br_tags = value.find_all('br')
@@ -157,7 +158,8 @@ def get_poke_weakness(data:BeautifulSoup):
         weakness = {}
 
         for i in range(len(headers)):
-            weakness[headers[i].find('a')['href'].split('/')[-1].split('.')[0].upper()] = values[i].text
+            val = float(values[i].text.split('*')[1])
+            weakness[headers[i].find('a')['href'].split('/')[-1].split('.')[0].upper()] = val
             
         if title:   
             info[title.text] = weakness
@@ -217,7 +219,7 @@ def get_evolution_chain(data:BeautifulSoup):
     return info
 
 def get_poke_gender_differences(data:BeautifulSoup):
-    info = {}
+    info = []
     hasDifferences = data.find("td", string="Gender Differences")
     
     if hasDifferences:
@@ -225,33 +227,26 @@ def get_poke_gender_differences(data:BeautifulSoup):
         rows = formsTable.find_all('tr', recursive=False)
         
         imgs = rows[1].find_all('img')
-        forms = []
         
         for img in imgs:
-            forms.append((img['alt'], base_url + img['src']))
-        
-        info['Gender Differences'] = forms
+            info.append((img['alt'], base_url + img['src']))
         
         return True, info
     else:
         return False, info
 
 def get_poke_alternate_forms(data:BeautifulSoup):
-    info = {}
+    info = []
     hasForms = data.find("td", string="Alternate Forms")
     
     if hasForms:
         formsTable = data.find("table")
         rows = formsTable.find_all('tr', recursive=False)
-        formsText = []
         for row in rows[::3]:
             forms = row.find_all('td')
             for form in forms:
-                formsText.append(form.text)
+                info.append(form.text)
             
-        
-        info['Alternate Forms'] = formsText
-        
         return True, info
     else:
         return False, info
@@ -285,7 +280,6 @@ def get_poke_tm_moves(data:BeautifulSoup):
     
     if hasMoves:
         rows = data.find_all('tr', recursive=False)
-        moves = {}
         hasForms = False
         
         if len(rows[2].find_all('td', recursive=False)) == 9:
@@ -300,12 +294,10 @@ def get_poke_tm_moves(data:BeautifulSoup):
             
             if hasForms:
                 for img in fields[-1].find_all('img'):
-                    moves.setdefault(img['alt'], []).append(m)
+                    info.setdefault(img['alt'], []).append(m)
             else:
-                moves.setdefault("Normal", []).append(m)
+                info.setdefault("Normal", []).append(m)
             
-        info['TM Moves'] = moves
-        
         return True, info
     else:
         return False, info
@@ -412,6 +404,122 @@ def get_poke_stats(data:BeautifulSoup):
     
     return info
 
+def join_data(pictures, info, more_info, even_more_info, weakness, gender_differences, alternate_forms, moves, stats):
+    pokemon = {}
+    
+    pokemon['abilities'] = more_info['Abilities']
+    pokemon['alternate_forms'] = alternate_forms
+    pokemon['base_happiness'] = int(more_info['Base Happiness'])
+    pokemon['capture_rate'] = int(info['Capture Rate'])
+    pokemon['classification'] = info['Classification']
+    pokemon['gender_differences'] = gender_differences
+    pokemon['image_link'] = pictures
+    pokemon['paldea_number'] = int(info['No.']['Paldea'].split('#')[1])
+    pokemon['moves'] = moves
+    pokemon['name'] = info['Name']
+    pokemon['national_number'] = int(info['No.']['National'].split('#')[1])
+    pokemon['other_names'] = info['Other Names']
+    pokemon['stats'] = stats
+    pokemon['type'] = info['Type']
+    pokemon['weakness'] = weakness
+    
+    gender = {}
+    if isinstance(info['Gender Ratio'], str):
+        gender['Unknown'] = 100
+    else:
+        for g in info['Gender Ratio']:
+            gender[g] = int(info['Gender Ratio'][g].split('%')[0].split('*')[0])
+            
+    pokemon['gender'] = gender
+    
+    height = {}
+    form = 'Normal Form'
+    
+    for h in info['Height']:
+        split_height = h.split(' / ')
+        if len(split_height) > 1:
+            for i in range(len(split_height)):
+                if alternate_forms[i] not in height:
+                    height[alternate_forms[i]] = {}
+                
+                if "'" in split_height[i]:
+                    height[alternate_forms[i]]['feet'] = split_height[i]
+                else:
+                    match = re.match(r"(\d+(?:\.\d+)?)\D", split_height[i])
+                    value = match.group(1)
+                    unit = split_height[i][len(value):] 
+                    height[alternate_forms[i]][unit] = float(value)
+        else:
+            if form not in height:
+                height[form] = {}
+            
+            if "'" in h:
+                height[form]['feet'] = h
+            else:
+                match = re.match(r"(\d+(?:\.\d+)?)\D", h)
+                value = match.group(1)
+                unit = h[len(value):] 
+                height[form][unit] = float(value)
+    
+    pokemon['height'] = height
+    
+    weight = {}
+    
+    for w in info['Weight']:
+        split_weight = w.split(' / ')
+        if len(split_weight) > 1:
+            for i in range(len(split_weight)):
+                if alternate_forms[i] not in weight:
+                    weight[alternate_forms[i]] = {}
+                
+                match = re.match(r"(\d+(?:\.\d+)?)\D", split_weight[i])
+                value = match.group(1)
+                unit = split_weight[i][len(value):] 
+                weight[alternate_forms[i]][unit] = float(value)
+        else:
+            if form not in weight:
+                weight[form] = {}
+            
+            match = re.match(r"(\d+(?:\.\d+)?)\D", w)
+            value = match.group(1)
+            unit = w[len(value):] 
+            weight[form][unit] = float(value)
+    
+    pokemon['weight'] = weight
+    
+    egg = {}
+    egg['egg_steps'] = int(info['Base Egg Steps'][0].split()[0].replace(',', ''))
+    egg['egg_cycles'] = int(info['Base Egg Steps'][1].split()[0])
+    egg['egg_group'] = even_more_info['Egg Groups']
+    
+    pokemon['egg'] = egg
+    
+    effort_values = {}
+    form = 'Normal Form'
+    
+    for value in more_info['Effort Values Earned']:
+        if re.search(r'\d', value):
+            s = value.split()
+            effort_values.setdefault(form, []).append({ 'type': s[1], 'value': int(s[0])})
+        else:
+            form = value
+    
+    pokemon['effort_values'] = effort_values
+    
+    '''
+    corrigir experience_growth
+    '''
+    
+    if even_more_info['Wild Hold Item'] == '':
+        pokemon['wild_hold_item'] = {}
+    else:
+        item_split = even_more_info['Wild Hold Item'].split(' - ')
+    
+        pokemon['wild_hold_item'] = { 'item': item_split[0], 'percentage': int(item_split[1].split('%')[0]) }
+    
+    
+    return pokemon
+
 def get_pokemon_data(pokemon):
     soup = BeautifulSoup(pokemon, 'html.parser')
     pokemon_info = soup.find('a', {'name': 'general'}).find_all_next('table', class_='dextable')
@@ -443,11 +551,12 @@ def get_pokemon_data(pokemon):
         i += 2
         
     hasLevelMoves = True
-    level_moves = []
+    level_moves = {}
     while hasLevelMoves:
         hasLevelMoves, moves = get_poke_level_moves(pokemon_info[i])
         if hasLevelMoves:
-            level_moves.append(moves)
+            for form in moves:
+                level_moves[form] = moves[form]
             i += 1
             
     hasTM, tm_moves = get_poke_tm_moves(pokemon_info[i])
@@ -478,7 +587,18 @@ def get_pokemon_data(pokemon):
     while i < len(pokemon_info):
         stats.append(get_poke_stats(pokemon_info[i]))
         i += 1
-
+    
+    moves = {}
+    moves['level_moves'] = level_moves
+    moves['tm_moves'] = tm_moves
+    moves['egg_moves'] = egg_moves
+    moves['reminder_moves'] = reminder_moves
+    moves['special_moves'] = special_moves
+    moves['pre_evolve_moves'] = pre_evo_moves
+    
+    pokemon = join_data(pictures, info, more_info, even_more_info, weakness, gender_differences, alternate_forms, moves, stats)
+    
+    # print(pokemon)
     
     # print(pictures)
     # print('\n')
@@ -515,27 +635,34 @@ def get_pokemon_data(pokemon):
     #     print(pre_evo_moves)
     # print('\n')
     # print(stats)
+    
+    return pokemon
 
 
 
-main_page_url = f"{base_url}/pokedex-sv"
-main_page = get_html_from_url(main_page_url)
 
-types_pages = get_all_types_pages(main_page)
+def loadPokemons():
+    main_page_url = f"{base_url}/pokedex-sv"
+    main_page = get_html_from_url(main_page_url)
 
-pokemons = []
-for type_page in types_pages:
-    page = get_html_from_url(type_page)
-    pokemons.extend(get_all_pokemon_from_page(page))
+    types_pages = get_all_types_pages(main_page)
 
-pokemons = list(set(pokemons))
+    pokemons = []
+    for type_page in types_pages:
+        page = get_html_from_url(type_page)
+        pokemons.extend(get_all_pokemon_from_page(page))
 
-i = 1
-for pokemon in pokemons:
-    print(len(pokemons) - i, ' - ', pokemon)
-    i += 1
-    poke = get_html_from_url(pokemon)
-    get_pokemon_data(poke)
+    pokemons = list(set(pokemons))
+
+    i = 1
+    loadedPokemons = []
+    for pokemon in pokemons:
+        print(len(pokemons) - i, ' - ', pokemon)
+        i += 1
+        poke = get_html_from_url(pokemon)
+        loadedPokemons.append(get_pokemon_data(poke))
+    
+    return loadedPokemons
     
 
 # poke = get_html_from_url('https://www.serebii.net/pokedex-sv/muk')
