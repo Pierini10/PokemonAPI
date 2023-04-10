@@ -20,7 +20,6 @@ router = APIRouter()
 
 def set_uniqueAttributes():
     pokemon_collection.create_index("national_number", unique=True)
-    pokemon_collection.create_index("paldea_number", unique=True)
     pokemon_collection.create_index("name", unique=True)
     attacks_collection.create_index("name", unique=True)
     abilities_collection.create_index("name", unique=True)
@@ -66,6 +65,7 @@ def get(request: Request, pokemon: SearchPokemon = Body(None)):
             raise HTTPException(status_code=400, detail="Invalid search")
     else:
         pokemons = list(pokemon_collection.find())
+
     return pokemons
 
 
