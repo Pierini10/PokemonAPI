@@ -53,7 +53,7 @@ def possible_pokemon_searchs(query: SearchPokemon):
 
     if (classification := query.classification):
         classification = prepareString(classification)
-        searchParams["classification"] = classification
+        searchParams["classification"] = {"$in": [classification]}
 
     if (query.hp):
         searchParams["stats.Stats.HP"] = int(query.hp)
