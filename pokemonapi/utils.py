@@ -6,13 +6,14 @@ def possible_pokemon_searchs(query: SearchPokemon):
     searchParams = {"$and": [], "$or": []}
 
     if (name := query.name):
-        name = name[0].upper() + name[1:].lower()
+        name = prepareString(name)
         nameID = {"name": name}
         jp = {"other_names.Japan": name}
         fr = {"other_names.French": name}
         gr = {"other_names.German": name}
         kr = {"other_names.Korean": name}
-        searchParams["$or"] = [jp, fr, gr, kr, nameID]
+        searchParams["$or"] = [
+            {'$where': f'function() {{ for (var key in this.other_names) {{ if (this.other_names[key].indexOf("{name}") > -1) return true; }} return false; }}'}, nameID]
 
     if (query.national_number):
         searchParams["national_number"] = int(query.national_number)
@@ -23,8 +24,8 @@ def possible_pokemon_searchs(query: SearchPokemon):
     if (types := query.type):
         for type in types:
             type = type.upper()
-            searchParams["$and"].append({"type.Normal": {
-                "$in": [type]}})
+            searchParams["$and"].append(
+                {'$where': f'function() {{ for (var key in this.type) {{ if (this.type[key].indexOf("{type}") > -1) return true; }} return false; }}'})
     if (alternate_forms := query.alternate_forms):
         for form in alternate_forms:
             form = prepareString(form)
@@ -136,6 +137,7 @@ def possible_pokemon_searchs(query: SearchPokemon):
                 '$elemMatch': {'Attack Name': move}}})
             findMove["$or"].append({'moves.egg_moves.Egg Moves': {
                 '$in': [move]}})
+
             searchParams["$and"].append(findMove)
 
     if (searchParams["$and"] == []):
