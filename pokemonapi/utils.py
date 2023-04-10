@@ -129,12 +129,14 @@ def possible_pokemon_searchs(query: SearchPokemon):
     if (moves := query.moves):
         for move in moves:
             move = prepareString(move)
-            searchParams["$or"].append({'moves.level_moves.Standard Level Up': {
-                                       '$elemMatch': {'Attack Name': move}}})
-            searchParams["$or"].append({'moves.tm_moves.Normal': {
-                                       '$elemMatch': {'Attack Name': move}}})
-            searchParams["$or"].append({'moves.egg_moves.Egg Moves': {
-                                       '$in': [move]}})
+            findMove = {"$or": []}
+            findMove["$or"].append({'moves.level_moves.Standard Level Up': {
+                '$elemMatch': {'Attack Name': move}}})
+            findMove["$or"].append({'moves.tm_moves.Normal': {
+                '$elemMatch': {'Attack Name': move}}})
+            findMove["$or"].append({'moves.egg_moves.Egg Moves': {
+                '$in': [move]}})
+            searchParams["$and"].append(findMove)
 
     if (searchParams["$and"] == []):
         del searchParams["$and"]
