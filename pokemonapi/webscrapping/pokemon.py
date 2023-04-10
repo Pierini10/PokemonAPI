@@ -540,7 +540,6 @@ def get_pokemon_data(pokemon):
     pokemon_info = soup.find('a', {'name': 'general'}).find_all_next('table', class_='dextable')
     
     pictures = get_poke_pictures(pokemon_info[0])
-    # separo pesos e alturas?
     info = get_poke_info(pokemon_info[1])
     more_info = get_poke_more_info(pokemon_info[2])
     
@@ -551,7 +550,6 @@ def get_pokemon_data(pokemon):
     even_more_info = get_poke_even_more_info(pokemon_info[i])
     i += 1
     # evolution_chain = get_evolution_chain(pokemon_info[i])
-    #está mal, resolver
     i += 1
     hasGenderDifferences, gender_differences = get_poke_gender_differences(pokemon_info[i])
     
