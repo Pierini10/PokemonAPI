@@ -65,7 +65,7 @@ class Pokemon(BaseModel):
     image_link: dict = Field(...)  # {image_name: link}
     type: dict = Field(...)
     stats: list[dict] = Field(...)
-    classification: str | list[str] = Field(...)
+    classification: list[str] = Field(...)
     height: dict = Field(...)  # {unit: height}
     weight: dict = Field(...)  # {unit: weight}
     capture_rate: int = Field(...)
