@@ -409,12 +409,16 @@ def join_data(pictures, info, more_info, even_more_info, weakness, gender_differ
     
     pokemon['abilities'] = more_info['Abilities']
     pokemon['alternate_forms'] = alternate_forms
-    if more_info['Base Happiness'] == '':
-        pokemon['base_happiness'] = 0
-    else:
+    try:
         pokemon['base_happiness'] = int(more_info['Base Happiness'])
+    except ValueError:
+        pokemon['base_happiness'] = 0
     pokemon['capture_rate'] = int(info['Capture Rate'])
-    pokemon['classification'] = info['Classification']
+    
+    if isinstance(info['Classification'], str):
+        pokemon['classification'] = [info['Classification']]
+    else:   
+        pokemon['classification'] = info['Classification']
     pokemon['gender_differences'] = gender_differences
     pokemon['image_link'] = pictures
     try:
