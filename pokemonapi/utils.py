@@ -8,10 +8,6 @@ def possible_pokemon_searchs(query: SearchPokemon):
     if (name := query.name):
         name = prepareString(name)
         nameID = {"name": name}
-        jp = {"other_names.Japan": name}
-        fr = {"other_names.French": name}
-        gr = {"other_names.German": name}
-        kr = {"other_names.Korean": name}
         searchParams["$or"] = [
             {'$where': f'function() {{ for (var key in this.other_names) {{ if (this.other_names[key].indexOf("{name}") > -1) return true; }} return false; }}'}, nameID]
 
