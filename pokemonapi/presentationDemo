@@ -1,0 +1,5 @@
+1 - get abilities sem nada
+2 - get abilities com Mummy
+3 - find attacks com {"type" : "fire"}
+4 - get pokemons com {"type" : ["Dragon"], "mtAttack" : 100, "ltTotal": 700,"moves": ["Snowscape"]}
+5 - get pokemons com {"type" : ["Dragon","Ice"], "mtAttack" : 100, "ltTotal": 700,"moves": ["Snowscape"]}
