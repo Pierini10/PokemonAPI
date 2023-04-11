@@ -40,9 +40,15 @@ def possible_pokemon_searchs(query: SearchPokemon):
 
     if (weaknesses := query.weakness):
         for weakness in weaknesses:
-            weakness = weakness[0].upper() + weakness[1:].lower()
-            searchParams['weakness["Normal Form"].' +
-                         weakness] = {"$exists": True}
+            weakness = weakness.upper()
+            searchParams["$and"].append(
+                {'$where': f'function() {{ for (var key in this.weakness) {{ if (this.weakness[key]["{weakness}"] > 1) return true; }} return false; }}'})
+
+    if (resistance := query.resistance):
+        for resist in resistance:
+            resist = resist.upper()
+            searchParams["$and"].append(
+                {'$where': f'function() {{ for (var key in this.weakness) {{ if (this.weakness[key]["{resist}"] < 1) return true; }} return false; }}'})
 
     if (query.male):
         searchParams["gender.male"] = int(query.male)

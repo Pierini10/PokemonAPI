@@ -273,6 +273,7 @@ class SearchPokemon(BaseModel):
     abilities: list = Field(None)
     type: list[str] = Field(None)
     weakness: list = Field(None)
+    resistance: list = Field(None)
     alternate_forms: list = Field(None)
 
     hp: int = Field(None)  # value of hp
